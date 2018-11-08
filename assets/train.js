@@ -1,3 +1,10 @@
+var trainName = "";
+var whereTo = "";
+var trainTime= "";
+var freMin =0;
+var newTrain;
+
+
 // Initialize Firebase--api info for my project on firebase
   var config = {
     apiKey: "AIzaSyCaK1SttWIwuuFEt8LX4k4k7vwpLq1wtP0",
@@ -18,100 +25,103 @@
     //-- I think frequency Mins and Minutes away can both be calculated??
     // leaving off of the firebase database for now until I confirm. Can next Arrival also be calculated? now thinking freMin should go on the database. going to add. 
 
-    var nextArrival = "";
-    var minsAway = "";
+   // 2. Button for adding train input
+$("#click-button").on("click", function(event) {
+  event.preventDefault();
 
-     // Click Button for adding train information
-     $("#click-button").on("click", function(event) {
-        // Prevent the page from refreshing
-        event.preventDefault();
+  // Grabs user input
+  var trainName = $("#train-name-input").val();
+  var whereTo = $("#destination-input").val();
+  var trainTime = moment($("#first-train-input").val(), "HH:mm").format("X");
+  // var freMin = $("frequency-input").val();
 
-        // Get inputs--- you add variable here not above
-      var trainName = $("#train-name-input").val().trim();
-      var destination = $("#destination-input" ).val().trim();
-      var freMin = $("#frequency-input").val().trim();
+  // removed the .trim() at the end of all these as I kept getting a console error
 
+  // Creates local "temporary" object for holding train input
+  var newTrain  = {
+    name: trainName,
+    destination: whereTo,
+    first: trainTime
+    // frequency: freMin
+  };
 
-        // Creates local "temporary" object for holding train info
-        var newTrain = {
-        name: trainName,
-        travel: destination,
-        time: freMin
-  
-       };
+  // Uploads train input to the database
+  database.ref().push(newTrain);
 
-        // Uploads inputted data to the database
-        database.ref().push(newTrain);
+  // Logs everything to console
+  // console.log(newTrain.trainName);
+  // console.log(newTrain.whereTo);
+  // console.log(newTrain.trainTime);
+  // console.log(newTrain.freMin);
 
-        // Logs everything to console
-        // console.log(newTrain.trainName);
-        // console.log(newTrain.destination);
-        // console.log(newTrain.freMin);
+  alert("train successfully added");
 
-        // alert("this works");
-        
-    //    // Change what is saved in firebase
-    //    database.ref().set({
-    //     trainName: trainName,
-    //     destination: destination,
-    //     freMin: freMin
-         // Clears all of the text-boxes
-        $("#train-name-input").val("");
-        $("#destination-input").val("");
-        $("#frequency-input").val("");
+  // Clears all of the text-boxes
+  $("#train-name-input").val("");
+  $("#destination-input").val("");
+  $("#first-train-input").val("");
+  // $("#frequency-input").val("");
+});
 
-      });
-    // });
+// // 3. Create Firebase event for adding employee to the database and a row in the html when a user adds an entry
+database.ref().on("value", function(snapshot) {
+  console.log(snapshot.val());
 
-        // Firebase is always watching for changes to the data.
-        // When changes occurs it will print them to console and html
-        database.ref().on("value", function(snapshot) {
+  var trainName = snapshot.val().name;
+  var whereTo = snapshot.val().destination;
+  var trainTime = snapshot.val().first;
+  // var frequency = childSanpshot.val().FREQUENCY;
 
-        // Print the initial data to the console.
-        console.log(snapshot.val());
+//   // Store everything into a variable.
+  // trainName = Object.values(snapshot.val());
+  // whereTo = Object.values(snapshot.val());
+  // trainTime = Object.values(snapshot.val());
+  // freMin = Object.values(snapshot.val());
 
-        // Store the value received from the above function to a variable
+  // Train Info
+  // console.log(trainName);
+  // console.log(whereTo);
+  // console.log(trainTime);
+  // console.log(freMin);
 
-        var trainName = snapshot.val().name;
-        var destination = snapshot.val().travel;
-        var freMin = snapshot.val().time;
+  // for (let i = 0; i < trainName.length; i++) {
+  //   data = $('<tr>').text(trainName[i].name);
+  //   data = $('<tr>').text(trainName[i].destination);
+  //   // data = $('<tr>').text(freMin[i].time);
+    
+    // $("tbody").append(data[i]);
+    
 
-        // console.log(trainName);
-        // console.log(destination);
-        // console.log(freMin);
+//   // Prettify the employee start
+//   var empStartPretty = moment.unix(empStart).format("MM/DD/YYYY");
 
-        // trainName = snapshot.val().name;
-        // $("#train-name-input").text(trainName);
+//   // Calculate the months worked using hardcore math
+//   // To calculate the months worked
+//   var empMonths = moment().diff(moment(empStart, "X"), "months");
+//   console.log(empMonths);
 
-        // create a new text line with the info inputted
-        var newInfo = $("<tr>").append(
-          $("<td>").text(trainName),
+//   // Calculate the total billed rate
+//   var empBilled = empMonths * empRate;
+//   console.log(empBilled);
 
-        );
+//   // Create the new row
+    var data = $("<tr>").append(
+    $("<td>").text(trainName),
+    $("<td>").text(whereTo),
+    $("<td>").text(trainTime)
+    // $("<td>").text(freMin)
+// //     $("<td>").text(empRate),
+// //     $("<td>").text(empBilled)
+  );
 
-        $("#train-table > tbody").append(newInfo);
-      });
-        // Log the value of the various properties
-        // console.log(snapshot.val().trainName);
-        // console.log(snapshot.val().destination);
-        // console.log(snapshot.val().freMin);
-        //     // ---these are commented out since I confirmed they showed up on the log and on the database.
-    // });
+// //   // Append the new row to the table
+  $("#train-table > tbody").append(data);
+});
 
+// Example Time Math
+// // -----------------------------------------------------------------------------
+// // Assume Employee start date of January 1, 2015
+// // Assume current date is March 1, 2016
 
-// why is this code not showing anything on the html?????
-    // database.ref().on("value", function(snapshot) {
-    //     // console.log(snapshot.val().trainName);
-        
-   
-
-        // clickCounter = snapshot.val().clickCount;
-        // clickCounter = snapshot.val().clickCount;
-        // $("#click-value").text(clickCounter);
-        // $("#click-value").text(clickCounter);
-        // $("#click-value").text(snapshot.val().clickCount);
-        // clickCounter = snapshot.val().clickCount;
-      // }, function(errorObject) {
-      //   console.log("The read failed: " + errorObject.code);
-      // });
-      
+// // We know that this is 15 months.
+// // Now we will create code in moment.js to confirm that any attempt we use meets this test case
