@@ -1,3 +1,27 @@
 .tbody{
-    display-inline
+    text-align:center;
+}
+
+td{
+    padding-left: 10px;
+    border-right: solid, 5px;
+    
+}
+
+#train-table th,
+td {
+  display: inline-block; 
+  width: 16.575%; 
+  color:black;
+}
+
+tr{
+  display: inline; 
+  width: 16.575%;
+  color: black;
+}
+
+.card-header{
+    text-align:center;
+    font-size: 30px;
 }

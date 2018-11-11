@@ -1,8 +1,12 @@
 var trainName = "";
 var whereTo = "";
-var trainTime= "";
-var freMin =0;
-var newTrain;
+var firstTime= "";
+var tFrequency = 5;
+var next;
+var minsAway=0;
+var currentTime;
+// var freMin=0;
+// does firstTrain need to be a variable with an input for the future trains to calculate from??
 
 
 // Initialize Firebase--api info for my project on firebase
@@ -32,8 +36,9 @@ $("#click-button").on("click", function(event) {
   // Grabs user input
   var trainName = $("#train-name-input").val();
   var whereTo = $("#destination-input").val();
-  var trainTime = moment($("#first-train-input").val(), "HH:mm").format("X");
-  // var freMin = $("frequency-input").val();
+  var firstTime = $("#first-train-input").val(); 
+  var tFrequency = $("#frequency-input").val();
+  console.log(firstTime);
 
   // removed the .trim() at the end of all these as I kept getting a console error
 
@@ -41,8 +46,8 @@ $("#click-button").on("click", function(event) {
   var newTrain  = {
     name: trainName,
     destination: whereTo,
-    first: trainTime
-    // frequency: freMin
+    first: firstTime,
+    frequency: tFrequency
   };
 
   // Uploads train input to the database
@@ -54,74 +59,106 @@ $("#click-button").on("click", function(event) {
   // console.log(newTrain.trainTime);
   // console.log(newTrain.freMin);
 
-  alert("train successfully added");
+  // alert("train successfully added");
 
   // Clears all of the text-boxes
   $("#train-name-input").val("");
   $("#destination-input").val("");
   $("#first-train-input").val("");
-  // $("#frequency-input").val("");
+  $("#frequency-input").val("");
 });
+// had to comment out the frequency lines because I kept getting an error that frequency was undefined. 
 
 // // 3. Create Firebase event for adding employee to the database and a row in the html when a user adds an entry
-database.ref().on("value", function(snapshot) {
-  console.log(snapshot.val());
+database.ref().on("child_added", function(snapshot) {
+  //console.log(snapshot.val());
 
   var trainName = snapshot.val().name;
   var whereTo = snapshot.val().destination;
-  var trainTime = snapshot.val().first;
-  // var frequency = childSanpshot.val().FREQUENCY;
+  var firstTime = snapshot.val().first;
+  var tFrequency = snapshot.val().frequency;
+  // console.log(tFrequency);
+// new code test here_____________________________________________
+// (TEST 1)
+    // First Train of the Day is 3:00 AM
+    // Assume Train comes every 3 minutes.
+    // Assume the current time is 3:16 AM....
+    // What time would the next train be...? (Use your brain first)
+    // It would be 3:18 -- 2 minutes away
 
-//   // Store everything into a variable.
-  // trainName = Object.values(snapshot.val());
-  // whereTo = Object.values(snapshot.val());
-  // trainTime = Object.values(snapshot.val());
-  // freMin = Object.values(snapshot.val());
+    // (TEST 2)
+    // First Train of the Day is 3:00 AM
+    // Assume Train comes every 7 minutes.
+    // Assume the current time is 3:16 AM....
+    // What time would the next train be...? (Use your brain first)
+    // It would be 3:21 -- 5 minutes away
 
-  // Train Info
-  // console.log(trainName);
-  // console.log(whereTo);
-  // console.log(trainTime);
-  // console.log(freMin);
 
-  // for (let i = 0; i < trainName.length; i++) {
-  //   data = $('<tr>').text(trainName[i].name);
-  //   data = $('<tr>').text(trainName[i].destination);
-  //   // data = $('<tr>').text(freMin[i].time);
+    // ==========================================================
+
+    // Solved Mathematically
+    // Test case 1:
+    // 16 - 00 = 16
+    // 16 % 3 = 1 (Modulus is the remainder)
+    // 3 - 1 = 2 minutes away
+    // 2 + 3:16 = 3:18
+
+    // Solved Mathematically
+    // Test case 2:
+    // 16 - 00 = 16
+    // 16 % 7 = 2 (Modulus is the remainder)
+    // 7 - 2 = 5 minutes away
+    // 5 + 3:16 = 3:21
+
+    // Assumptions
+    var tFrequency;
+
+    // Time is 3:00 AM
+    var firstTime = "3:00";
+
+    // First Time (pushed back 1 year to make sure it comes before current time)
+    var firstTimeConverted = moment(firstTime, "HH:mm");
+    console.log(firstTimeConverted);
     
-    // $("tbody").append(data[i]);
-    
+    // Current Time
+    var currentTime = moment();
+   console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
 
-//   // Prettify the employee start
-//   var empStartPretty = moment.unix(empStart).format("MM/DD/YYYY");
+    // Difference between the times
+    var diffTime = moment().diff(firstTimeConverted, "minutes");
+    // console.log("DIFFERENCE IN TIME: " + diffTime);
 
-//   // Calculate the months worked using hardcore math
-//   // To calculate the months worked
-//   var empMonths = moment().diff(moment(empStart, "X"), "months");
-//   console.log(empMonths);
+    // Time apart (remainder)
+    var tRemainder = diffTime % tFrequency;
+    console.log(tRemainder);
 
-//   // Calculate the total billed rate
-//   var empBilled = empMonths * empRate;
-//   console.log(empBilled);
+    // Minute Until Train
+    var tMinutesTillTrain = tFrequency - tRemainder;
+    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+
+    // Next Train
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes").format("H:HH");
+    // console.log("ARRIVAL TIME: " + moment(nextTrain).format("H:HH"));
+
 
 //   // Create the new row
     var data = $("<tr>").append(
     $("<td>").text(trainName),
     $("<td>").text(whereTo),
-    $("<td>").text(trainTime)
-    // $("<td>").text(freMin)
-// //     $("<td>").text(empRate),
-// //     $("<td>").text(empBilled)
+    $("<td>").text(tFrequency),
+    $("<td>").text(nextTrain),
+    $("<td>").text(""),
+    $("<td>").text(tMinutesTillTrain)
   );
 
 // //   // Append the new row to the table
   $("#train-table > tbody").append(data);
 });
 
-// Example Time Math
-// // -----------------------------------------------------------------------------
-// // Assume Employee start date of January 1, 2015
-// // Assume current date is March 1, 2016
-
-// // We know that this is 15 months.
-// // Now we will create code in moment.js to confirm that any attempt we use meets this test case
+$("tr").on("click", "span", function(event){
+  $(this).parent().fadeOut(500, function(){
+      $(this).remove();
+// the first this refers to span. the second this refers to the parent! parent retrieves the li that's enclosing the span that was clicked on. 
+  });
+  event.stopPropagation();
+});
