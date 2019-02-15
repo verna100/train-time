@@ -137,7 +137,7 @@ database.ref().on("child_added", function(snapshot) {
     console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
 
     // Next Train
-    var nextTrain = moment().add(tMinutesTillTrain, "minutes").format("H:HH");
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes").format("LT");
     // console.log("ARRIVAL TIME: " + moment(nextTrain).format("H:HH"));
 
 
